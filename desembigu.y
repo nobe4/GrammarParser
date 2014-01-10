@@ -3,6 +3,7 @@
     #include <iostream>
     #include <string>
     #include <vector>
+    #include <algorithm>
     using namespace std;
 
     extern "C" int yylex();
@@ -20,10 +21,18 @@
     // display the grammar
     void print(vector< pair< string,vector< string > > > &rules);
 
+    // create a string from the vector of rule
+s    string toString(vector< string > &rules);
+
     // remove a Direct Left Recursion on the rules
     // return true if the operation was sucessfull (there was a DLR)
     // return false otherwise
     bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol);
+
+    // remove Indirect Left Recursions on the rules
+    // return true if the operation was sucessfull (there was ILR(s))
+    // return false otherwise
+    bool removeILR(vector< pair< string,vector< string > > > &rules);
 
 %}
 
@@ -113,7 +122,9 @@ main(int c, char *v[]) {
     
     print(rules);
 
-    removeDLR(rules, string("A"));
+    removeILR(rules);
+
+    print(rules);
 }
 
 void yyerror(const char *s) {
@@ -130,6 +141,15 @@ void print(vector< pair< string,vector< string > > > &rules){
         }
         cout << endl;
     }
+    cout << "\n\n\n";
+}
+
+string toString(vector< string > &rules){
+    string r = "";
+    for(int i = 0; i < rules.size(); ++i){
+        r += rules.at(i) + " ";
+    }
+    return r;
 }
 
 bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol){
@@ -169,4 +189,66 @@ bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol){
 
     print(rules);
     return true;
+}
+
+bool removeILR(vector< pair< string,vector< string > > > &rules){
+
+    // detecting all non terminals and add it in the nonTerm Vector
+    vector<string> nonTerm;
+    for(int i = 0; i < rules.size(); ++i){
+        if(find(nonTerm.begin(),nonTerm.end(),rules.at(i).first) == nonTerm.end()){
+            nonTerm.push_back(rules.at(i).first);
+        }
+    }
+
+    // cout << "non terminals : " << toString(nonTerm) << endl;
+
+    // follow the algorithm : for each non terminal symbol
+    for (int i = 0; i < nonTerm.size(); ++i){
+        // cout << "i : " << i << " -> " << nonTerm.at(i) << endl;
+        for (int j = 0; j < i; ++j){
+            // cout << "j : " << j << " -> " << nonTerm.at(j) << endl;
+            // we search for a rule like the following : Ai -> Aj b
+            for(int k = 0; k < rules.size(); ++k){
+                // cout << "k : " << k << " : " << rules.at(k).first << " -> " << toString(rules.at(k).second) << endl;
+                if(rules.at(k).first == nonTerm.at(i) && rules.at(k).second.at(0) == nonTerm.at(j)){
+                    // cout << "working on this rule" << endl;
+                    // we search for production : Aj -> x
+                    for(int l = 0; l < rules.size(); ++l){
+                        // cout << "l : " << l << " : " << rules.at(l).first << " ?= " << nonTerm.at(j) << endl;
+                        if(rules.at(l).first == nonTerm.at(j)){
+                            // cout << "Ai : " << rules.at(l).first << " -> " << toString(rules.at(l).second) << endl;
+                            // cout << "k : " << k  << " Aj : " << rules.at(k).first << " -> " << toString(rules.at(k).second) << endl;
+
+                            // construct the new rule : Ai -> x b
+                            vector<string> newRuleFromAj = rules.at(k).second;
+                            vector<string> newRuleFromAi = rules.at(l).second;
+
+                            // cout << "newRuleFromAi: " << toString(newRuleFromAi) << endl;
+                            // cout << "newRuleFromAj before removing : " << toString(newRuleFromAj) << endl;
+
+                            // we erase the Aj from the new RuleFromAi : 
+                            newRuleFromAj.erase(newRuleFromAj.begin());
+                            // cout << "newRuleFromAj after removing : " << toString(newRuleFromAj) << endl;
+                            // we concatenate the both :
+                            newRuleFromAi.insert(newRuleFromAi.end(),newRuleFromAj.begin(), newRuleFromAj.end());
+                            
+                            // we add the new rule to the existing rules
+                            // cout << "newRuleFromAj after concatenate : " << toString(newRuleFromAi) << endl;
+                            // cout << "before adding rule" << endl;
+                            // print(rules);
+                            rules.push_back(make_pair(nonTerm.at(i),newRuleFromAi));
+                            // cout << "after adding rule" << endl;
+                            // print(rules);
+                        }
+                    }
+                    // we remove the current rule to avoid redundance
+                    rules.erase(rules.begin() + k);
+                }
+            }
+        }
+        // we remove the DLR for the symbole Ai
+        removeDLR(rules,nonTerm.at(i));
+    }
+    return true; // execution successed
 }
