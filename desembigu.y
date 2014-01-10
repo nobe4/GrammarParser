@@ -12,10 +12,10 @@
     extern "C" FILE *yyin;
 
     #define YYSTYPE char *
-     
+
     void yyerror(const char *s);
 
-    vector< pair< string,vector< string > > > rules; // vector of rules  : a string for the first symbole and a vector of strings for the second symbols
+    vector< pair< string,vector< string > > > rules; // vector of rules  : a string for the first symbol and a vector of strings for the second symbols
     string cFS; // current First Symbol
     vector<string> cSS; // current Second Symbol
 
@@ -25,12 +25,12 @@
     // create a string from the vector of rule
     string toString(vector< string > &rules);
 
-    // remove a Direct Left Recursion on the rules
+    // remove a Direct Left Recursion on rules
     // return true if the operation was sucessfull (there was a DLR)
     // return false otherwise
     bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol);
 
-    // remove Indirect Left Recursions on the rules
+    // remove Indirect Left Recursions on rules
     // return true if the operation was sucessfull (there was ILR(s))
     // return false otherwise
     bool removeILR(vector< pair< string,vector< string > > > &rules);
@@ -47,13 +47,13 @@
 
 %%
 
-// the gramar is nothing or the axiom only or the axioms followed by rules
+// the gramar is nothing, or the axiom only, or the axioms followed by rules
 grammar: /* nothing */
         | axiom
         | axiom EOL rules;
 
-// rules are a rule, and on the next lines other rules or a single rule
-rules : 
+// rules are a rule, and on the next lines other rules, or a single rule
+rules :
         rules EOL rule {
             rules.push_back(make_pair(cFS,cSS));
             cSS.clear();
@@ -66,10 +66,10 @@ rules :
             // $$ = $1;
             // cout << "rules rule : " <<  $$ << endl;
         };
-    
+
 // the axiom is a rule
-axiom : 
-        rule {  
+axiom :
+        rule {
                 // cout << cFS << endl;
                 rules.push_back(make_pair(cFS,cSS));
                 cSS.clear();
@@ -77,14 +77,14 @@ axiom :
                 // cout << "axiom rule : " <<  $$ << endl;
         };
 
-// a rule is a non terminal symbol a whitespace and a set of symbols or epsilon
-rule : 
+// a rule is [a non terminal symbol, a whitespace, and a set of symbols], or [epsilon]
+rule :
         symbol WHITESPACE symbols {
             // cout << "cFS " << cFS << " => ";
             cFS = string($1);
             // cout << cFS << endl;
             // $$ = $1;
-            // cout << "rule symbole ws : " <<  $$ << " -> " << $3 << endl;
+            // cout << "rule symbol ws : " <<  $$ << " -> " << $3 << endl;
         }
     |   symbol WHITESPACE{
             cFS = string($1);
@@ -95,7 +95,7 @@ rule :
             cSS.insert(cSS.begin(),string("ε"));
         };
 
-// symbols are a symbol a whitespace and other symbols or only a symbol
+// symbols are [a symbol, a whitespace, and other symbols], or [only a symbol]
 symbols :
         symbol WHITESPACE symbols {
             cSS.insert(cSS.begin(),string($1));
@@ -118,7 +118,7 @@ symbol :
 %%
 
 main(int c, char *v[]) {
-    // open a file handle to a particular file:
+    // open file corresponding to file name given as a parameter
     FILE *myfile = fopen(v[1], "r");
     // make sure it is valid:
     if (!myfile) {
@@ -128,11 +128,11 @@ main(int c, char *v[]) {
     // set flex to read from it instead of defaulting to STDIN:
     yyin = myfile;
 
-    // parse through the input until there is no more:
+    // parse through the input until there is no more to read:
     do {
         yyparse();
     } while (!feof(yyin));
-    
+
     print(rules);
 
     // removeILR(rules);
@@ -181,16 +181,16 @@ string toString(vector< string > &rules){
 
 bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol){
     // we assume symbol is in the grammar
-    
-    // if not the function will return false without doing anything
+
+    // if not, the function will return false without doing anything
 
     bool DLRExist = false; // set if the grammar has DLR for the given symbol
 
     // detect if there is a DLR
     vector< pair< string,vector< string > > >::iterator it = rules.begin();
     while(!DLRExist && it != rules.end()){
-        if(it->first == symbol){ //if the first symbol is the one searched
-            if(it->second.at(0) == symbol){ // if the first element of the second symbols is the one searched
+        if(it->first == symbol){ //if the first symbol is the wanted one
+            if(it->second.at(0) == symbol){ // if the first element of the second symbols is the wanted one
                 DLRExist = true;
             }
         }
@@ -198,19 +198,19 @@ bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol){
     }
     if(!DLRExist) return DLRExist; // no DLR was found
 
-    //from here a DLR was found
+    // starting here a DLR was found
 
     // creating the new state
     string newSymbol = symbol + "'";
-    pair< string,vector< string > > tmpRule; // temporary rule we will use for building the others rules
+    pair< string,vector< string > > tmpRule; // temporary rule we will use for building the other rules
     // we add the empty state for the new symbol
     vector<string> epsilonTmp;
     epsilonTmp.push_back("ε");
     rules.push_back(make_pair(newSymbol,epsilonTmp));
-    // for all stats that contains the same first : 
+    // for all states that contain the same first :
     for(it = rules.begin(); it != rules.end(); ++it){
         if(it->first == symbol){
-            if(it->second.at(0) == symbol){ // if the first element of the second symbols is the one searched
+            if(it->second.at(0) == symbol){ // if the first element of the second symbols is the wanted one
                 it->second.erase(it->second.begin()); //  we remove the first element (the symbol)
                 it->first = newSymbol;
             }
@@ -222,7 +222,7 @@ bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol){
 
 bool removeILR(vector< pair< string,vector< string > > > &rules){
 
-    // detecting all non terminals and add it in the nonTerm Vector
+    // detecting all non terminals and add it in the nonTerm vector
     vector<string> nonTerm;
     for(int i = 0; i < rules.size(); ++i){
         if(find(nonTerm.begin(),nonTerm.end(),rules.at(i).first) == nonTerm.end()){
@@ -237,12 +237,12 @@ bool removeILR(vector< pair< string,vector< string > > > &rules){
         // cout << "i : " << i << " -> " << nonTerm.at(i) << endl;
         for (int j = 0; j < i; ++j){
             // cout << "j : " << j << " -> " << nonTerm.at(j) << endl;
-            // we search for a rule like the following : Ai -> Aj b
+            // we search for a rule similar to the following : Ai -> Aj b
             for(int k = 0; k < rules.size(); ++k){
                 // cout << "k : " << k << " : " << rules.at(k).first << " -> " << toString(rules.at(k).second) << endl;
                 if(rules.at(k).first == nonTerm.at(i) && rules.at(k).second.at(0) == nonTerm.at(j)){
                     // cout << "working on this rule" << endl;
-                    // we search for production : Aj -> x
+                    // we search for productions similar to : Aj -> x
                     for(int l = 0; l < rules.size(); ++l){
                         // cout << "l : " << l << " : " << rules.at(l).first << " ?= " << nonTerm.at(j) << endl;
                         if(rules.at(l).first == nonTerm.at(j)){
@@ -256,13 +256,13 @@ bool removeILR(vector< pair< string,vector< string > > > &rules){
                             // cout << "newRuleFromAi: " << toString(newRuleFromAi) << endl;
                             // cout << "newRuleFromAj before removing : " << toString(newRuleFromAj) << endl;
 
-                            // we erase the Aj from the new RuleFromAi : 
+                            // we erase the Aj from the new RuleFromAi :
                             newRuleFromAj.erase(newRuleFromAj.begin());
                             // cout << "newRuleFromAj after removing : " << toString(newRuleFromAj) << endl;
-                            // we concatenate the both :
+                            // we concatenate both :
                             newRuleFromAi.insert(newRuleFromAi.end(),newRuleFromAj.begin(), newRuleFromAj.end());
-                            
-                            // we add the new rule to the existing rules
+
+                            // we add the new rule to existing rules
                             // cout << "newRuleFromAj after concatenate : " << toString(newRuleFromAi) << endl;
                             // cout << "before adding rule" << endl;
                             // print(rules);
@@ -276,7 +276,7 @@ bool removeILR(vector< pair< string,vector< string > > > &rules){
                 }
             }
         }
-        // we remove the DLR for the symbole
+        // we remove the DLR for the symbol
         removeDLR(rules,nonTerm.at(i));
     }
     return true; // execution successed
@@ -306,11 +306,11 @@ void facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, st
             vector< string > newSecond = it->second;
             newSecond.erase(newSecond.begin()); //  we remove the first symbol
             rules.erase(it); // we remove the rule
-            --it;       // we decremente the iterator to avoid missing a element
+            --it;       // we decremente the iterator to avoid missing an element
             rules.push_back(make_pair(nonTerm + ",",newSecond)); // we add the new rule
         }
     }
-    //we create and add the rule with the newNonTerm in the productionn
+    //we create and add the rule with the newNonTerm in the production
     vector< string > newSecond;
     newSecond.push_back(symbol);
     newSecond.push_back(nonTerm + ",");

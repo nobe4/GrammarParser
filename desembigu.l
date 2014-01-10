@@ -6,12 +6,12 @@ using namespace std;
 
 #define YYSTYPE char*
 
-#include "desembigu.tab.h"  // to get the token types that we return
+#include "desembigu.tab.h"  // necessary to get the token types that we return
 
 %}
 whiteSpace      [ \t]+
-eol             {whiteSpace}*\n   
-word            [a-zA-Z0-9]+ 
+eol             {whiteSpace}*\n
+word            [a-zA-Z0-9]+
 
 
 %%

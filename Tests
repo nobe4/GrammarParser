@@ -1,4 +1,4 @@
-Here are the followings tests made with the results : 
+Here are the followings tests made with the results :
 
 #   test from : http://stackoverflow.com/questions/15999916/step-by-step-elimination-of-this-indirect-left-recursion
 
@@ -10,18 +10,18 @@ A C d
 B C e
 
     parsed.txt (outout)
-C A 
-C B 
-C f 
-A' d A' 
-A B d A' 
-A f d A' 
-A' ε 
-B' e B' 
-B f e B' 
-B' d A' e B' 
-B f d A' e B' 
-B' ε 
+C A
+C B
+C f
+A' d A'
+A B d A'
+A f d A'
+A' ε
+B' e B'
+B f e B'
+B' d A' e B'
+B f d A' e B'
+B' ε
 
 # test from : http://www.cs.bgu.ac.il/~comp101/wiki.files/tirgul8.pdf (p3-4)
 
@@ -30,33 +30,33 @@ S C
 S a
 C D d
 C c
-D C c 
+D C c
 D d
 
     parsed.txt (outout)
-S C 
-S a 
-C D d 
-C c 
-D d D' 
-D' d c D' 
-D c c D' 
-D' ε 
+S C
+S a
+C D d
+C c
+D d D'
+D' d c D'
+D c c D'
+D' ε
 
 # test from : http://www.linguist.jussieu.fr/~amsili/Ens06/poly-li324-1.pdf (p2)
 
     parse.txt (input)
 S A a
 S b
-A A c 
-A S d 
+A A c
+A S d
 A c
 
     parsed.txt (outout)
-S A a 
-S b 
-A' c A' 
-A c A' 
-A' a d A' 
-A b d A' 
+S A a
+S b
+A' c A'
+A c A'
+A' a d A'
+A b d A'
 A' ε
