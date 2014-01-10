@@ -1,6 +1,5 @@
-S C
-S a
-C D d
-C c
-D C c 
-D d
+C A
+C B
+C f
+A C d
+B C e

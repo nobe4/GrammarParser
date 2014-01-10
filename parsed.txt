@@ -1,8 +1,13 @@
-S C 
-S a 
-C D d 
-C c 
-D d D' 
-D' d c D' 
-D c c D' 
-D' ε 
+C A 
+C B 
+C f 
+A' d A' 
+A B d A' 
+A f d A' 
+A' ε 
+B' e B' 
+B' d A' e B' 
+B' ε 
+B, e B' 
+B, d A' e B' 
+B f B, 
