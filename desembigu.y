@@ -35,6 +35,9 @@
     // return false otherwise
     bool removeILR(vector< pair< string,vector< string > > > &rules);
 
+    // make a factorization over the rules
+    void factorize(vector< pair< string,vector< string > > > &rules);
+
 %}
 
 %token STRING EOL WHITESPACE
@@ -121,9 +124,7 @@ main(int c, char *v[]) {
     }
     // set flex to read from it instead of defaulting to STDIN:
     yyin = myfile;
-    
-    // extern int yydebug;
-    // yydebug = 1;
+
     // parse through the input until there is no more:
     do {
         yyparse();
@@ -274,4 +275,8 @@ bool removeILR(vector< pair< string,vector< string > > > &rules){
         removeDLR(rules,nonTerm.at(i));
     }
     return true; // execution successed
+}
+
+void factorize(vector< pair< string,vector< string > > > &rules){
+    
 }

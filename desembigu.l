@@ -9,7 +9,7 @@ using namespace std;
 #include "desembigu.tab.h"  // to get the token types that we return
 
 %}
-whiteSpace      [ \t]  
+whiteSpace      [ \t]+
 eol             {whiteSpace}*\n   
 word            [a-zA-Z0-9]+ 
 

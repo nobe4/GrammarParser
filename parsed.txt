@@ -6,4 +6,3 @@ D d D'
 D' d c D' 
 D c c D' 
 D' ε 
-
