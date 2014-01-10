@@ -121,7 +121,7 @@ symbol :
 
 %%
 
-main(int c, char *v[]) {
+int main(int c, char *v[]) {
     // open file corresponding to file name given as a parameter
     FILE *myfile = fopen(v[1], "r");
     // make sure it is valid:
