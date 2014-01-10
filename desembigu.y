@@ -282,7 +282,19 @@ bool removeILR(vector< pair< string,vector< string > > > &rules){
     return true; // execution successed
 }
 
-void factorize(vector< pair< string,vector< string > > > &rules){}
+void factorize(vector< pair< string,vector< string > > > &rules){
+    // detecting all non terminals and add it in the nonTerm Vector
+    vector<string> nonTerm;
+    for(int i = 0; i < rules.size(); ++i){
+        if(find(nonTerm.begin(),nonTerm.end(),rules.at(i).first) == nonTerm.end()){
+            nonTerm.push_back(rules.at(i).first);
+        }
+    }
+
+    for (int i = 0; i < nonTerm.size; ++i){
+        string symbol = 
+    }
+}
 
 void facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, string symbol){
     vector< pair< string,vector< string > > >::iterator it;
