@@ -1,6 +1,6 @@
 GrammarParser
 =============
-References :
+
 Parsing and optimizing a grammar with flex and bison.
 
 To build and run thoses files with the file parse.txt, use the following command (tested on linux) :
