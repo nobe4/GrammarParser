@@ -10,8 +10,8 @@ using namespace std;
 
 %}
 whiteSpace      [ \t]  
-eol             {whiteSpace}*\n          
-word            [a-zA-Z0-9]+
+eol             {whiteSpace}*\n   
+word            [a-zA-Z0-9]+ 
 
 
 %%

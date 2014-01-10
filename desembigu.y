@@ -13,9 +13,18 @@
      
     void yyerror(const char *s);
 
-    vector< pair< string,vector< string > > > rules;
+    vector< pair< string,vector< string > > > rules; // vector of rules  : a string for the first symbole and a vector of strings for the second symbols
     string cFS; // current First Symbol
     vector<string> cSS; // current Second Symbol
+
+    // display the grammar
+    void print(vector< pair< string,vector< string > > > &rules);
+
+    // remove a Direct Left Recursion on the rules
+    // return true if the operation was sucessfull (there was a DLR)
+    // return false otherwise
+    bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol);
+
 %}
 
 %token STRING EOL WHITESPACE
@@ -102,6 +111,18 @@ main(int c, char *v[]) {
         yyparse();
     } while (!feof(yyin));
     
+    print(rules);
+
+    removeDLR(rules, string("A"));
+}
+
+void yyerror(const char *s) {
+    cout << "Parse error : " << s << endl;
+    // might as well halt now:
+    exit(-1);
+}
+
+void print(vector< pair< string,vector< string > > > &rules){
     for(int i = 0; i < rules.size(); ++i){
         cout << rules.at(i).first << " -> ";
         for(int j = 0; j < rules.at(i).second.size(); j ++){
@@ -111,8 +132,41 @@ main(int c, char *v[]) {
     }
 }
 
-void yyerror(const char *s) {
-    cout << "Parse error : " << s << endl;
-    // might as well halt now:
-    exit(-1);
+bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol){
+    // we assume symbol is in the grammar
+    
+    // if not the function will return false without doing anything
+
+    bool DLRExist = false; // set if the grammar has DLR for the given symbol
+
+    // detect if there is a DLR
+    vector< pair< string,vector< string > > >::iterator it = rules.begin();
+    while(!DLRExist && it != rules.end()){
+        if(it->first == symbol){ //if the first symbol is the one searched
+            if(it->second.at(0) == symbol){ // if the first element of the second symbols is the one searched
+                DLRExist = true;
+            }
+        }
+        ++it;
+    }
+    if(!DLRExist) return DLRExist; // no DLR was found
+
+    //from here a DLR was found
+
+    // creating the new state
+    string newSymbol = symbol + "'";
+    pair< string,vector< string > > tmpRule; // temporary rule we will use for building the others rules
+    // for all stats that contains the same first : 
+    for(it = rules.begin(); it != rules.end(); ++it){
+        if(it->first == symbol){
+            if(it->second.at(0) == symbol){ // if the first element of the second symbols is the one searched
+                it->second.erase(it->second.begin()); //  we remove the first element (the symbol)
+                it->first = newSymbol;
+            }
+            it->second.push_back(newSymbol); // we add the new symbol
+        }
+    }
+
+    print(rules);
+    return true;
 }
