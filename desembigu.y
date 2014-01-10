@@ -275,3 +275,17 @@ bool removeILR(vector< pair< string,vector< string > > > &rules){
     }
     return true; // execution successed
 }
+
+string detectFacto(vector< pair< string,vector< string > > > &rules, string nonTerm) {
+    for (int i = 0; i < rules.size(); ++i) {
+        if (rules[i].first == nonTerm) {
+            for (int j = 0; j < rules.size(); ++j) {
+                if (rules[j].first == nonTerm && j != i) {
+                    if (rules[i].second[0] == rules[j].second[0]) {
+                        return rules[i].second[0];
+                    }
+                }
+            }
+        }
+    }
+}

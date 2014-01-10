@@ -1,7 +1,7 @@
 GrammarParser
 =============
 
-Parsing and optimizing a grammar with flex and bison
+Parsing and optimizing a grammar with flex and bison.
 
 To build and run thoses files on the file parse.txt use this command (tested on linux) :
 
