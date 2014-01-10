@@ -38,8 +38,12 @@
     // make a factorization over the rules
     void factorize(vector< pair< string,vector< string > > > &rules);
 
-    // make a factorisation for the nonTerm and the symbol specified
-    void facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, string symbol);
+    // make a factorisation for the nonTerm and the symbol specified and return the new state created
+    string facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, string symbol);
+
+    // check if there is a new refactor to do
+    // return the symbol we will need to refactor over the nonTerm
+    string detectFacto(vector< pair< string,vector< string > > > &rules, string nonTerm);
 
 %}
 
@@ -135,23 +139,25 @@ main(int c, char *v[]) {
     
     print(rules);
 
-    // removeILR(rules);
+    removeILR(rules);
+    
+    print(rules);
 
-    facto1(rules,string("A"),string("c"));
+    factorize(rules);
 
     print(rules);
 
-    // // display the parsed grammar to the file parsed.txt
-    // ofstream output("parsed.txt");
-    // if(output.is_open()){
-    //     for(int i = 0; i < rules.size(); ++i){
-    //         output << rules.at(i).first << " ";
-    //         for(int j = 0; j < rules.at(i).second.size(); j ++){
-    //             output << rules.at(i).second.at(j) << " ";
-    //         }
-    //         output << endl;
-    //     }
-    // }
+    // display the parsed grammar to the file parsed.txt
+    ofstream output("parsed.txt");
+    if(output.is_open()){
+        for(int i = 0; i < rules.size(); ++i){
+            output << rules.at(i).first << " ";
+            for(int j = 0; j < rules.at(i).second.size(); j ++){
+                output << rules.at(i).second.at(j) << " ";
+            }
+            output << endl;
+        }
+    }
 }
 
 void yyerror(const char *s) {
@@ -282,6 +288,21 @@ bool removeILR(vector< pair< string,vector< string > > > &rules){
     return true; // execution successed
 }
 
+string detectFacto(vector< pair< string,vector< string > > > &rules, string nonTerm) {
+    for (int i = 0; i < rules.size(); ++i) {
+        if (rules[i].first == nonTerm) {
+            for (int j = 0; j < rules.size(); ++j) {
+                if (rules[j].first == nonTerm && j != i) {
+                    if (rules[i].second[0] == rules[j].second[0]) {
+                        return rules[i].second[0];
+                    }
+                }
+            }
+        }
+    }
+    return "";
+}
+
 void factorize(vector< pair< string,vector< string > > > &rules){
     // detecting all non terminals and add it in the nonTerm Vector
     vector<string> nonTerm;
@@ -291,12 +312,16 @@ void factorize(vector< pair< string,vector< string > > > &rules){
         }
     }
 
-    for (int i = 0; i < nonTerm.size; ++i){
-        string symbol = 
+    for (int i = 0; i < nonTerm.size(); ++i){
+        string symbol = detectFacto(rules, nonTerm.at(i));
+        while(symbol != ""){
+            nonTerm.push_back(facto1(rules,nonTerm.at(i),symbol));
+            symbol = detectFacto(rules, nonTerm.at(i));
+        }
     }
 }
 
-void facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, string symbol){
+string facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, string symbol){
     vector< pair< string,vector< string > > >::iterator it;
     for (it = rules.begin(); it != rules.end(); ++it){
         // if we match the good rule
@@ -313,4 +338,5 @@ void facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, st
     newSecond.push_back(symbol);
     newSecond.push_back(nonTerm + ",");
     rules.push_back(make_pair(nonTerm,newSecond));
+    return nonTerm + ",";
 }
