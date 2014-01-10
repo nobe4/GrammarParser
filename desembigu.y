@@ -35,6 +35,12 @@
     // return false otherwise
     bool removeILR(vector< pair< string,vector< string > > > &rules);
 
+    // make a factorization over the rules
+    void factorize(vector< pair< string,vector< string > > > &rules);
+
+    // make a factorisation for the nonTerm and the symbol specified
+    void facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, string symbol);
+
 %}
 
 %token STRING EOL WHITESPACE
@@ -121,9 +127,7 @@ main(int c, char *v[]) {
     }
     // set flex to read from it instead of defaulting to STDIN:
     yyin = myfile;
-    
-    // extern int yydebug;
-    // yydebug = 1;
+
     // parse through the input until there is no more:
     do {
         yyparse();
@@ -131,21 +135,23 @@ main(int c, char *v[]) {
     
     print(rules);
 
-    removeILR(rules);
+    // removeILR(rules);
+
+    facto1(rules,string("A"),string("c"));
 
     print(rules);
 
-    // display the parsed grammar to the file parsed.txt
-    ofstream output("parsed.txt");
-    if(output.is_open()){
-        for(int i = 0; i < rules.size(); ++i){
-            output << rules.at(i).first << " ";
-            for(int j = 0; j < rules.at(i).second.size(); j ++){
-                output << rules.at(i).second.at(j) << " ";
-            }
-            output << endl;
-        }
-    }
+    // // display the parsed grammar to the file parsed.txt
+    // ofstream output("parsed.txt");
+    // if(output.is_open()){
+    //     for(int i = 0; i < rules.size(); ++i){
+    //         output << rules.at(i).first << " ";
+    //         for(int j = 0; j < rules.at(i).second.size(); j ++){
+    //             output << rules.at(i).second.at(j) << " ";
+    //         }
+    //         output << endl;
+    //     }
+    // }
 }
 
 void yyerror(const char *s) {
@@ -288,4 +294,25 @@ string detectFacto(vector< pair< string,vector< string > > > &rules, string nonT
             }
         }
     }
+}
+
+void factorize(vector< pair< string,vector< string > > > &rules){}
+
+void facto1(vector< pair< string,vector< string > > > &rules, string nonTerm, string symbol){
+    vector< pair< string,vector< string > > >::iterator it;
+    for (it = rules.begin(); it != rules.end(); ++it){
+        // if we match the good rule
+        if(it->first == nonTerm && it->second.at(0) == symbol){
+            vector< string > newSecond = it->second;
+            newSecond.erase(newSecond.begin()); //  we remove the first symbol
+            rules.erase(it); // we remove the rule
+            --it;       // we decremente the iterator to avoid missing a element
+            rules.push_back(make_pair(nonTerm + ",",newSecond)); // we add the new rule
+        }
+    }
+    //we create and add the rule with the newNonTerm in the productionn
+    vector< string > newSecond;
+    newSecond.push_back(symbol);
+    newSecond.push_back(nonTerm + ",");
+    rules.push_back(make_pair(nonTerm,newSecond));
 }
