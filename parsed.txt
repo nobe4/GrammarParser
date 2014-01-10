@@ -1,0 +1,9 @@
+S C 
+S a 
+C D d 
+C c 
+D d D' 
+D' d c D' 
+D c c D' 
+D' ε 
+

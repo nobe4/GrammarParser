@@ -4,6 +4,7 @@
     #include <string>
     #include <vector>
     #include <algorithm>
+    #include <fstream>
     using namespace std;
 
     extern "C" int yylex();
@@ -22,7 +23,7 @@
     void print(vector< pair< string,vector< string > > > &rules);
 
     // create a string from the vector of rule
-s    string toString(vector< string > &rules);
+    string toString(vector< string > &rules);
 
     // remove a Direct Left Recursion on the rules
     // return true if the operation was sucessfull (there was a DLR)
@@ -70,7 +71,7 @@ axiom :
                 // cout << "axiom rule : " <<  $$ << endl;
         };
 
-// a rule is a non terminal symbol a whitespace and a set of symbols
+// a rule is a non terminal symbol a whitespace and a set of symbols or epsilon
 rule : 
         symbol WHITESPACE symbols {
             // cout << "cFS " << cFS << " => ";
@@ -78,6 +79,14 @@ rule :
             // cout << cFS << endl;
             // $$ = $1;
             // cout << "rule symbole ws : " <<  $$ << " -> " << $3 << endl;
+        }
+    |   symbol WHITESPACE{
+            cFS = string($1);
+            cSS.insert(cSS.begin(),string("ε"));
+        }
+    |   symbol{
+            cFS = string($1);
+            cSS.insert(cSS.begin(),string("ε"));
         };
 
 // symbols are a symbol a whitespace and other symbols or only a symbol
@@ -125,6 +134,18 @@ main(int c, char *v[]) {
     removeILR(rules);
 
     print(rules);
+
+    // display the parsed grammar to the file parsed.txt
+    ofstream output("parsed.txt");
+    if(output.is_open()){
+        for(int i = 0; i < rules.size(); ++i){
+            output << rules.at(i).first << " ";
+            for(int j = 0; j < rules.at(i).second.size(); j ++){
+                output << rules.at(i).second.at(j) << " ";
+            }
+            output << endl;
+        }
+    }
 }
 
 void yyerror(const char *s) {
@@ -176,6 +197,10 @@ bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol){
     // creating the new state
     string newSymbol = symbol + "'";
     pair< string,vector< string > > tmpRule; // temporary rule we will use for building the others rules
+    // we add the empty state for the new symbol
+    vector<string> epsilonTmp;
+    epsilonTmp.push_back("ε");
+    rules.push_back(make_pair(newSymbol,epsilonTmp));
     // for all stats that contains the same first : 
     for(it = rules.begin(); it != rules.end(); ++it){
         if(it->first == symbol){
@@ -186,8 +211,6 @@ bool removeDLR(vector< pair< string,vector< string > > > &rules, string symbol){
             it->second.push_back(newSymbol); // we add the new symbol
         }
     }
-
-    print(rules);
     return true;
 }
 
@@ -247,7 +270,7 @@ bool removeILR(vector< pair< string,vector< string > > > &rules){
                 }
             }
         }
-        // we remove the DLR for the symbole Ai
+        // we remove the DLR for the symbole
         removeDLR(rules,nonTerm.at(i));
     }
     return true; // execution successed
